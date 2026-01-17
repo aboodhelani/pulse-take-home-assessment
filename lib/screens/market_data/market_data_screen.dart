@@ -251,7 +251,7 @@ class _MarketDataScreenState extends State<MarketDataScreen> with TickerProvider
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withAlpha(5),
                           blurRadius: 10,
                           offset: const Offset(0, 2),
                         ),
@@ -390,7 +390,7 @@ class _MarketDataScreenState extends State<MarketDataScreen> with TickerProvider
                           Text(
                             '${provider.marketData.length} result${provider.marketData.length != 1 ? 's' : ''}',
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.textTheme.bodySmall?.color?.withOpacity(0.6),
+                              color: theme.textTheme.bodySmall?.color?.withAlpha(60),
                             ),
                           ),
                         if (provider.isFromCache && provider.cacheTimestamp != null)
@@ -400,13 +400,13 @@ class _MarketDataScreenState extends State<MarketDataScreen> with TickerProvider
                               Icon(
                                 Icons.offline_bolt,
                                 size: 14,
-                                color: theme.colorScheme.secondary.withOpacity(0.7),
+                                color: theme.colorScheme.secondary.withAlpha(70),
                               ),
                               const SizedBox(width: 4),
                               Text(
                                 'Cached ${_formatTimestamp(provider.cacheTimestamp!)}',
                                 style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.textTheme.bodySmall?.color?.withOpacity(0.6),
+                                  color: theme.textTheme.bodySmall?.color?.withAlpha(60),
                                   fontSize: 11,
                                 ),
                               ),

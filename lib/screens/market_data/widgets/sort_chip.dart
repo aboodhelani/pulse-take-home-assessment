@@ -29,10 +29,10 @@ class SortChip extends StatelessWidget {
         curve: Curves.easeInOut,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: isActive ? theme.colorScheme.primary.withOpacity(0.15) : Colors.transparent,
+          color: isActive ? theme.colorScheme.primary.withAlpha(15) : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isActive ? theme.colorScheme.primary.withOpacity(0.3) : Colors.transparent,
+            color: isActive ? theme.colorScheme.primary.withAlpha(30) : Colors.transparent,
             width: 1,
           ),
         ),

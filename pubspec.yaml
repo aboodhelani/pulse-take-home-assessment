@@ -41,6 +41,11 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^3.0.0
 
+  # Testing
+  plugin_platform_interface: ^2.0.0
+  path_provider_platform_interface: ^2.0.0
+  
+
   # Serialization
   build_runner: ^2.4.14
   json_serializable: ^6.9.3
