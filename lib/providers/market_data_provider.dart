@@ -13,17 +13,6 @@ class MarketDataProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
 
-  // TODO: Implement loadMarketData() method
-  // This should:
-  // 1. Set _isLoading = true and _error = null
-  // 2. Call notifyListeners()
-  // 3. Call _apiService.getMarketData()
-  // 4. Convert the response to List<MarketData> using MarketData.fromJson
-  // 5. Set _marketData with the result
-  // 6. Handle errors by setting _error
-  // 7. Set _isLoading = false
-  // 8. Call notifyListeners() again
-
   Future<void> loadMarketData() async {
     _isLoading = true;
     _error = null;
