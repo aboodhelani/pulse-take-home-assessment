@@ -29,6 +29,9 @@ dependencies:
   # Serialization
   json_annotation: ^4.9.0
 
+  # Pull to refresh
+  pull_to_refresh: ^2.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
