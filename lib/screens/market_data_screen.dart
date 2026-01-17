@@ -45,6 +45,7 @@ class _MarketDataScreenState extends State<MarketDataScreen> {
                   'Error: ${provider.error}',
                   textAlign: TextAlign.center,
                 ),
+                const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () => provider.loadMarketData(),
                   child: const Text('Retry'),
@@ -54,15 +55,52 @@ class _MarketDataScreenState extends State<MarketDataScreen> {
           );
         }
 
-        return ListView.builder(
-          itemCount: provider.marketData.length,
-          itemBuilder: (context, index) {
-            final marketData = provider.marketData[index];
-            return ListTile(
-              title: Text(marketData.symbol ?? ''),
-              subtitle: Text('${marketData.price}'),
-            );
-          },
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Column(
+            children: [
+              const Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Symbol', style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text('Price', style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text('24h Change', style: TextStyle(fontWeight: FontWeight.bold)),
+                ],
+              ),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: provider.marketData.length,
+                  itemBuilder: (context, index) {
+                    final marketData = provider.marketData[index];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(marketData.symbol ?? '-'),
+                          Text('${marketData.price ?? '-'}'),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color:
+                                  marketData.change24h != null && marketData.change24h! > 0 ? Colors.green.withAlpha(20) : Colors.red.withAlpha(20),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text(
+                              '${marketData.change24h ?? '-'}',
+                              style: TextStyle(
+                                  color: marketData.change24h != null && marketData.change24h! > 0 ? Colors.green : Colors.red,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         );
       },
     );
