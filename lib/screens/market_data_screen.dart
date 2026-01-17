@@ -89,7 +89,7 @@ class _MarketDataScreenState extends State<MarketDataScreen> {
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: Text(
-                                '${marketData.change24h ?? '-'}',
+                                marketData.change24h.formattedPercentage,
                                 style: TextStyle(
                                     color: marketData.change24h != null && marketData.change24h! > 0 ? Colors.green : Colors.red,
                                     fontWeight: FontWeight.bold),
