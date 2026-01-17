@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:pulsenow_flutter/enms/sort_type.dart';
 import 'package:pulsenow_flutter/services/websocket_service.dart';
 import '../services/api_service.dart';
+import '../services/cache_service.dart';
 import '../models/market_data_model.dart';
 
 class MarketDataProvider with ChangeNotifier {
@@ -14,6 +15,8 @@ class MarketDataProvider with ChangeNotifier {
   String _searchQuery = '';
   SortType _sortType = SortType.none;
   bool _sortAscending = true;
+  bool _isFromCache = false;
+  DateTime? _cacheTimestamp;
 
   List<MarketData> get marketData => _filteredMarketData;
   List<MarketData> get allMarketData => _marketData;
@@ -22,30 +25,67 @@ class MarketDataProvider with ChangeNotifier {
   String get searchQuery => _searchQuery;
   SortType get sortType => _sortType;
   bool get sortAscending => _sortAscending;
+  bool get isFromCache => _isFromCache;
+  DateTime? get cacheTimestamp => _cacheTimestamp;
 
   final WebSocketService _webSocketService = WebSocketService();
 
-  Future<void> loadMarketData() async {
+  /// Initialize provider and load cached data
+  Future<void> initialize() async {
+    // Load cached data first for instant display
+    final cachedData = await CacheService.loadMarketData();
+    if (cachedData != null && cachedData.isNotEmpty) {
+      _marketData = cachedData;
+      _cacheTimestamp = await CacheService.getCacheTimestamp();
+      _isFromCache = true;
+      _applyFiltersAndSort();
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadMarketData({bool forceRefresh = false}) async {
     _isLoading = true;
     _error = null;
+    _isFromCache = false;
     _webSocketService.disconnect();
     notifyListeners();
 
     try {
       _marketData = await _apiService.getMarketData();
+      // Save to cache after successful API call
+      await CacheService.saveMarketData(_marketData);
+      _cacheTimestamp = await CacheService.getCacheTimestamp();
       _applyFiltersAndSort();
       _isLoading = false;
       notifyListeners();
+
       _webSocketService.connect();
       _webSocketService.stream?.listen((marketData) {
         final index = _marketData.indexWhere((data) => data.symbol == marketData.symbol);
         if (index != -1) {
           _marketData[index] = marketData;
+          // Save updated data to cache when WebSocket updates
+          CacheService.saveMarketData(_marketData);
         }
+        _applyFiltersAndSort();
         notifyListeners();
       });
     } catch (e) {
-      _error = e.toString();
+      // If API call fails, try to load from cache if not already loaded
+      if (_marketData.isEmpty) {
+        final cachedData = await CacheService.loadMarketData();
+        if (cachedData != null && cachedData.isNotEmpty) {
+          _marketData = cachedData;
+          _cacheTimestamp = await CacheService.getCacheTimestamp();
+          _isFromCache = true;
+          _applyFiltersAndSort();
+        } else {
+          _error = e.toString();
+        }
+      } else {
+        // We have cached data, mark it as such
+        _isFromCache = true;
+      }
     } finally {
       _isLoading = false;
       notifyListeners();

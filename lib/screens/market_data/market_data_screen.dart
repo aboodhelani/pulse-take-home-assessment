@@ -20,8 +20,12 @@ class _MarketDataScreenState extends State<MarketDataScreen> with TickerProvider
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      Provider.of<MarketDataProvider>(context, listen: false).loadMarketData();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      final provider = Provider.of<MarketDataProvider>(context, listen: false);
+      // Initialize cache first
+      await provider.initialize();
+      // Then load fresh data
+      await provider.loadMarketData();
     });
   }
 
@@ -375,18 +379,39 @@ class _MarketDataScreenState extends State<MarketDataScreen> with TickerProvider
                 ),
                 const SizedBox(height: 12),
 
-                // Results count
-                if (provider.searchQuery.isNotEmpty || provider.sortType != SortType.none)
+                // Results count and cache indicator
+                if (provider.searchQuery.isNotEmpty || provider.sortType != SortType.none || provider.isFromCache)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8),
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          '${provider.marketData.length} result${provider.marketData.length != 1 ? 's' : ''}',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.textTheme.bodySmall?.color?.withOpacity(0.6),
+                        if (provider.searchQuery.isNotEmpty || provider.sortType != SortType.none)
+                          Text(
+                            '${provider.marketData.length} result${provider.marketData.length != 1 ? 's' : ''}',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.textTheme.bodySmall?.color?.withOpacity(0.6),
+                            ),
                           ),
-                        ),
+                        if (provider.isFromCache && provider.cacheTimestamp != null)
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.offline_bolt,
+                                size: 14,
+                                color: theme.colorScheme.secondary.withOpacity(0.7),
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Cached ${_formatTimestamp(provider.cacheTimestamp!)}',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.textTheme.bodySmall?.color?.withOpacity(0.6),
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ],
+                          ),
                       ],
                     ),
                   ),
@@ -483,5 +508,20 @@ class _MarketDataScreenState extends State<MarketDataScreen> with TickerProvider
         );
       },
     );
+  }
+
+  String _formatTimestamp(DateTime timestamp) {
+    final now = DateTime.now();
+    final difference = now.difference(timestamp);
+
+    if (difference.inMinutes < 1) {
+      return 'just now';
+    } else if (difference.inMinutes < 60) {
+      return '${difference.inMinutes}m ago';
+    } else if (difference.inHours < 24) {
+      return '${difference.inHours}h ago';
+    } else {
+      return '${difference.inDays}d ago';
+    }
   }
 }
