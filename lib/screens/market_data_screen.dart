@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:pulsenow_flutter/utils/extensions.dart';
 import '../providers/market_data_provider.dart';
 
 class MarketDataScreen extends StatefulWidget {
@@ -79,7 +80,7 @@ class _MarketDataScreenState extends State<MarketDataScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(marketData.symbol ?? '-'),
-                            Text('${marketData.price ?? '-'}'),
+                            Text(marketData.price.formattedPrice),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
