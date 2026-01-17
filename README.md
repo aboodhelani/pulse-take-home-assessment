@@ -23,6 +23,11 @@ flutter pub get
 flutter run
 ```
 
+6. Run the test:
+```bash
+flutter test
+```
+
 ## Project Structure
 
 ```
