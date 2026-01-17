@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:pulsenow_flutter/enms/sort_type.dart';
 import 'package:pulsenow_flutter/screens/market_data/widgets/market_data_card.dart';
+import 'package:pulsenow_flutter/screens/market_data/widgets/sort_chip.dart';
 import '../../providers/market_data_provider.dart';
 
 class MarketDataScreen extends StatefulWidget {
@@ -14,7 +16,7 @@ class MarketDataScreen extends StatefulWidget {
 class _MarketDataScreenState extends State<MarketDataScreen> with TickerProviderStateMixin {
   final RefreshController _refreshController = RefreshController(initialRefresh: false);
   final Map<String, AnimationController> _animationControllers = {};
-
+  final TextEditingController _searchController = TextEditingController();
   @override
   void initState() {
     super.initState();
@@ -30,6 +32,7 @@ class _MarketDataScreenState extends State<MarketDataScreen> with TickerProvider
       controller.dispose();
     }
     _animationControllers.clear();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -156,7 +159,7 @@ class _MarketDataScreenState extends State<MarketDataScreen> with TickerProvider
           );
         }
 
-        if (provider.marketData.isEmpty) {
+        if (provider.allMarketData.isEmpty) {
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -178,6 +181,37 @@ class _MarketDataScreenState extends State<MarketDataScreen> with TickerProvider
           );
         }
 
+        if (provider.marketData.isEmpty && (provider.searchQuery.isNotEmpty || provider.sortType != SortType.none)) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.search_off,
+                  size: 64,
+                  color: theme.textTheme.bodyLarge?.color?.withAlpha(30),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'No results found',
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: theme.textTheme.bodyLarge?.color?.withAlpha(60),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextButton.icon(
+                  onPressed: () {
+                    provider.clearFilters();
+                    _searchController.clear();
+                  },
+                  icon: const Icon(Icons.clear),
+                  label: const Text('Clear filters'),
+                ),
+              ],
+            ),
+          );
+        }
+
         return Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -193,6 +227,170 @@ class _MarketDataScreenState extends State<MarketDataScreen> with TickerProvider
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
+                // Search Bar
+                TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0.0, end: 1.0),
+                  duration: const Duration(milliseconds: 400),
+                  curve: Curves.easeOut,
+                  builder: (context, value, child) {
+                    return Opacity(
+                      opacity: value,
+                      child: Transform.translate(
+                        offset: Offset(0, -10 * (1 - value)),
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: theme.cardColor,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: TextField(
+                      controller: _searchController,
+                      onChanged: (value) {
+                        provider.setSearchQuery(value);
+                      },
+                      decoration: InputDecoration(
+                        hintText: 'Search by symbol...',
+                        prefixIcon: Icon(
+                          Icons.search,
+                          color: theme.colorScheme.primary,
+                        ),
+                        suffixIcon: provider.searchQuery.isNotEmpty
+                            ? IconButton(
+                                icon: Icon(Icons.clear, color: theme.colorScheme.primary),
+                                onPressed: () {
+                                  _searchController.clear();
+                                  provider.setSearchQuery('');
+                                },
+                              )
+                            : null,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                        filled: true,
+                        fillColor: theme.cardColor,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // Sort Controls
+                TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0.0, end: 1.0),
+                  duration: const Duration(milliseconds: 500),
+                  curve: Curves.easeOut,
+                  builder: (context, value, child) {
+                    return Opacity(
+                      opacity: value,
+                      child: Transform.translate(
+                        offset: Offset(0, -10 * (1 - value)),
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          decoration: BoxDecoration(
+                            color: theme.cardColor,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(left: 12, right: 8),
+                                child: Icon(
+                                  Icons.sort,
+                                  size: 20,
+                                  color: theme.colorScheme.primary,
+                                ),
+                              ),
+                              Expanded(
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Row(
+                                    children: [
+                                      SortChip(
+                                        label: 'Symbol',
+                                        sortType: SortType.symbol,
+                                        currentSortType: provider.sortType,
+                                        isAscending: provider.sortAscending,
+                                        onTap: () => provider.setSortType(SortType.symbol),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      SortChip(
+                                        label: 'Price',
+                                        sortType: SortType.price,
+                                        currentSortType: provider.sortType,
+                                        isAscending: provider.sortAscending,
+                                        onTap: () => provider.setSortType(SortType.price),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      SortChip(
+                                        label: 'Change',
+                                        sortType: SortType.change,
+                                        currentSortType: provider.sortType,
+                                        isAscending: provider.sortAscending,
+                                        onTap: () => provider.setSortType(SortType.change),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      if (provider.sortType != SortType.none || provider.searchQuery.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8),
+                          child: IconButton(
+                            icon: Icon(Icons.clear_all, color: theme.colorScheme.primary),
+                            onPressed: () {
+                              provider.clearFilters();
+                              _searchController.clear();
+                            },
+                            tooltip: 'Clear filters',
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // Results count
+                if (provider.searchQuery.isNotEmpty || provider.sortType != SortType.none)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Row(
+                      children: [
+                        Text(
+                          '${provider.marketData.length} result${provider.marketData.length != 1 ? 's' : ''}',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.textTheme.bodySmall?.color?.withOpacity(0.6),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
                 // Animated header
                 TweenAnimationBuilder<double>(
                   tween: Tween(begin: 0.0, end: 1.0),
