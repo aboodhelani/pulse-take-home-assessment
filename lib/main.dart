@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'screens/home_screen.dart';
+import 'package:pulsenow_flutter/router/router.dart';
 import 'providers/market_data_provider.dart';
 
 void main() {
@@ -20,7 +20,7 @@ class PulseNowApp extends StatelessWidget {
           primarySwatch: Colors.blue,
           useMaterial3: true,
         ),
-        home: const HomeScreen(),
+        onGenerateRoute: AppRouter.generateRoute,
         debugShowCheckedModeBanner: false,
       ),
     );

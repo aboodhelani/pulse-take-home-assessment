@@ -52,8 +52,11 @@ class MarketDataCard extends StatelessWidget {
               color: Colors.transparent,
               child: InkWell(
                 onTap: () {
-                  // Add haptic feedback
-                  // HapticFeedback.lightImpact();
+                  Navigator.pushNamed(
+                    context,
+                    '/market-data-details',
+                    arguments: marketData,
+                  );
                 },
                 borderRadius: BorderRadius.circular(16),
                 child: Padding(
