@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:pulsenow_flutter/enms/sort_type.dart';
+import 'package:pulsenow_flutter/services/websocket_service.dart';
 import '../services/api_service.dart';
 import '../models/market_data_model.dart';
 
@@ -22,9 +23,12 @@ class MarketDataProvider with ChangeNotifier {
   SortType get sortType => _sortType;
   bool get sortAscending => _sortAscending;
 
+  final WebSocketService _webSocketService = WebSocketService();
+
   Future<void> loadMarketData() async {
     _isLoading = true;
     _error = null;
+    _webSocketService.disconnect();
     notifyListeners();
 
     try {
@@ -32,6 +36,14 @@ class MarketDataProvider with ChangeNotifier {
       _applyFiltersAndSort();
       _isLoading = false;
       notifyListeners();
+      _webSocketService.connect();
+      _webSocketService.stream?.listen((marketData) {
+        final index = _marketData.indexWhere((data) => data.symbol == marketData.symbol);
+        if (index != -1) {
+          _marketData[index] = marketData;
+        }
+        notifyListeners();
+      });
     } catch (e) {
       _error = e.toString();
     } finally {

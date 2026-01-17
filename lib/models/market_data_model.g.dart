@@ -8,17 +8,17 @@ part of 'market_data_model.dart';
 
 MarketData _$MarketDataFromJson(Map<String, dynamic> json) => MarketData(
       symbol: json['symbol'] as String?,
-      price: json['price'] as num?,
-      change24h: json['change24h'] as num?,
-      changePercent24h: json['changePercent24h'] as num?,
-      volume: json['volume'] as num?,
+      price: MarketData._numFromJson(json['price']),
+      change24h: MarketData._numFromJson(json['change24h']),
+      changePercent24h: MarketData._numFromJson(json['changePercent24h']),
+      volume: MarketData._numFromJson(json['volume']),
     );
 
 Map<String, dynamic> _$MarketDataToJson(MarketData instance) =>
     <String, dynamic>{
       'symbol': instance.symbol,
-      'price': instance.price,
-      'change24h': instance.change24h,
-      'changePercent24h': instance.changePercent24h,
-      'volume': instance.volume,
+      'price': MarketData._numToJson(instance.price),
+      'change24h': MarketData._numToJson(instance.change24h),
+      'changePercent24h': MarketData._numToJson(instance.changePercent24h),
+      'volume': MarketData._numToJson(instance.volume),
     };
