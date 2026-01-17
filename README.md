@@ -5,14 +5,20 @@ This is the Flutter application for the PulseNow assessment. Your task is to imp
 ## Setup
 
 1. Ensure Flutter is installed (Flutter 3.0+)
+
 2. Install dependencies:
 ```bash
 flutter pub get
 ```
 
-3. Make sure the backend server is running (see `../backend/README.md`)
+3. Genrate models
+```bash
+ dart run build_runner build -d
+```
 
-4. Run the app:
+4. Make sure the backend server is running (see `../backend/README.md`)
+
+5. Run the app:
 ```bash
 flutter run
 ```

@@ -13,8 +13,9 @@ class _MarketDataScreenState extends State<MarketDataScreen> {
   @override
   void initState() {
     super.initState();
-    // TODO: Load market data when screen initializes
-    // Provider.of<MarketDataProvider>(context, listen: false).loadMarketData();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      Provider.of<MarketDataProvider>(context, listen: false).loadMarketData();
+    });
   }
 
   @override
@@ -30,17 +31,20 @@ class _MarketDataScreenState extends State<MarketDataScreen> {
         //   - Price (formatted as currency)
         //   - 24h change (with color: green for positive, red for negative)
         // Implement pull-to-refresh using RefreshIndicator
-        
+
         if (provider.isLoading) {
           return const Center(child: CircularProgressIndicator());
         }
-        
+
         if (provider.error != null) {
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Error: ${provider.error}'),
+                Text(
+                  'Error: ${provider.error}',
+                  textAlign: TextAlign.center,
+                ),
                 ElevatedButton(
                   onPressed: () => provider.loadMarketData(),
                   child: const Text('Retry'),
@@ -49,10 +53,16 @@ class _MarketDataScreenState extends State<MarketDataScreen> {
             ),
           );
         }
-        
-        // TODO: Replace this placeholder with actual list implementation
-        return const Center(
-          child: Text('Market Data Screen - To be implemented'),
+
+        return ListView.builder(
+          itemCount: provider.marketData.length,
+          itemBuilder: (context, index) {
+            final marketData = provider.marketData[index];
+            return ListTile(
+              title: Text(marketData.symbol ?? ''),
+              subtitle: Text('${marketData.price}'),
+            );
+          },
         );
       },
     );
