@@ -3,8 +3,8 @@ class AppConstants {
   // API Configuration
   // Note: For Android emulator, use 10.0.2.2 instead of localhost
   // For iOS simulator, localhost works fine
-  static const String baseUrl = 'http://10.0.2.2:3000/api';
-  static const String wsUrl = 'ws://10.0.2.2:3000';
+  static const String baseUrl = 'http://localhost:3000/api';
+  static const String wsUrl = 'ws://localhost:3000';
 
   // For Android emulator, uncomment these:
   // static const String baseUrl = 'http://10.0.2.2:3000/api';
